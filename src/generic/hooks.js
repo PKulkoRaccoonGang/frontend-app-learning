@@ -65,6 +65,7 @@ export function useIFrameHeight(onIframeLoaded = null) {
  * when a specified skip link is activated by pressing the "Enter" key, "Space" key, or by clicking the link.
  *
  * @param {string} [targetElementId='main-content'] - The ID of the element to skip to when the link is activated.
+ * @param {string} [targetElementClass=null] - The CSS class of the element to skip to if an ID is not provided.
  * @param {string} [skipLinkSelector='a[href="#main-content"]'] - The CSS selector for the skip link.
  * @param {number} [scrollOffset=100] - The offset to apply when scrolling to the target element (in pixels).
  *
@@ -72,6 +73,7 @@ export function useIFrameHeight(onIframeLoaded = null) {
  */
 export function useScrollToContent(
   targetElementId = 'main-content',
+  targetElementClass = null,
   skipLinkSelector = 'a[href="#main-content"]',
   scrollOffset = 100,
 ) {
@@ -90,7 +92,7 @@ export function useScrollToContent(
       targetElement.focus({ preventScroll: true });
     } else {
       // eslint-disable-next-line no-console
-      console.warn(`Element with ID "${targetElementId}" exists but is not focusable.`);
+      console.warn('Element is not focusable.');
     }
   };
 
@@ -110,15 +112,24 @@ export function useScrollToContent(
   const handleSkipAction = useCallback((event) => {
     if (shouldTriggerSkip(event)) {
       event.preventDefault();
-      const targetElement = document.getElementById(targetElementId);
+      let targetElement = null;
+
+      if (targetElementId) {
+        targetElement = document.getElementById(targetElementId);
+      } else if (targetElementClass) {
+        targetElement = document.querySelector(`.${targetElementClass}`);
+      }
+
       if (targetElement) {
         scrollToTarget(targetElement);
       } else {
         // eslint-disable-next-line no-console
-        console.warn(`Element with ID "${targetElementId}" not found.`);
+        console.warn(
+          `Element with ID "${targetElementId}" or class "${targetElementClass}" not found.`,
+        );
       }
     }
-  }, [targetElementId, scrollOffset]);
+  }, [targetElementId, targetElementClass, scrollOffset]);
 
   useEffect(() => {
     const skipLinkElement = document.querySelector(skipLinkSelector);

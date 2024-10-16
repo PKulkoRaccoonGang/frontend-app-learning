@@ -56,15 +56,12 @@ const SequenceNavigation = ({
     <Button
       variant="link"
       className="previous-btn"
-      aria-label="previous-btn"
+      aria-label={shouldDisplayNotificationTriggerInSequence ? intl.formatMessage(messages.previousButton) : null}
       onClick={previousSequenceHandler}
       disabled={isFirstUnit}
       iconBefore={prevArrow}
-      role="tabpanel"
       tabIndex={-1}
-      aria-controls={intl.formatMessage(messages.previousButton)}
       id={intl.formatMessage(messages.previousButton)}
-      aria-labelledby={intl.formatMessage(messages.previousButton)}
     >
       {shouldDisplayNotificationTriggerInSequence ? null : intl.formatMessage(messages.previousButton)}
     </Button>
@@ -82,15 +79,12 @@ const SequenceNavigation = ({
       <Button
         variant="link"
         className="next-btn"
-        aria-label="next-btn"
+        aria-label={shouldDisplayNotificationTriggerInSequence ? buttonText : null}
         onClick={buttonOnClick}
         disabled={disabled}
         iconAfter={nextArrow}
-        role="tabpanel"
         tabIndex={-1}
-        aria-controls={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
         id={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
-        aria-labelledby={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
       >
         {shouldDisplayNotificationTriggerInSequence ? null : buttonText}
       </Button>
@@ -120,6 +114,7 @@ const SequenceNavigation = ({
       <SequenceNavigationTabs
         unitIds={sequence.unitIds}
         unitId={unitId}
+        sequenceId={sequenceId}
         showCompletion={sequence.showCompletion}
         onNavigate={onNavigate}
         previousButton={<PreviousButton />}

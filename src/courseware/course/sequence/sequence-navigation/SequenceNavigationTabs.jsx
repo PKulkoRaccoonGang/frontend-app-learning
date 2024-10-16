@@ -7,7 +7,7 @@ import SequenceNavigationDropdown from './SequenceNavigationDropdown';
 import useIndexOfLastVisibleChild from '../../../../generic/tabs/useIndexOfLastVisibleChild';
 
 const SequenceNavigationTabs = ({
-  unitIds, unitId, showCompletion, onNavigate, previousButton, nextButton,
+  unitIds, unitId, sequenceId, showCompletion, onNavigate, previousButton, nextButton,
 }) => {
   const parentRef = useArrowKeyNavigation({
     selectors: 'button:not(:disabled)',
@@ -36,6 +36,7 @@ const SequenceNavigationTabs = ({
             <UnitButton
               key={buttonUnitId}
               unitId={buttonUnitId}
+              sequenceId={sequenceId}
               isActive={unitId === buttonUnitId}
               showCompletion={showCompletion}
               onClick={onNavigate}
@@ -59,6 +60,7 @@ const SequenceNavigationTabs = ({
 
 SequenceNavigationTabs.propTypes = {
   unitId: PropTypes.string.isRequired,
+  sequenceId: PropTypes.string.isRequired,
   onNavigate: PropTypes.func.isRequired,
   showCompletion: PropTypes.bool.isRequired,
   unitIds: PropTypes.arrayOf(PropTypes.string).isRequired,
