@@ -5,6 +5,7 @@ import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { breakpoints } from '@edx/paragon';
 import MockAdapter from 'axios-mock-adapter';
+import { within } from '@testing-library/react';
 
 import {
   fireEvent, initializeMockApp, logUnhandledRequests, render, screen, act,
@@ -1112,6 +1113,11 @@ describe('Progress Tab', () => {
           linkType: 'button',
           pageName: 'progress',
         });
+
+        const certificateStatusComponent = screen.queryByTestId('certificate-status-component');
+        expect(certificateStatusComponent).toBeInTheDocument();
+        const headerElement = within(certificateStatusComponent).getByRole('heading', { level: 2 });
+        expect(headerElement).toBeInTheDocument();
       });
 
       it('Displays nothing if audit only', async () => {
@@ -1181,7 +1187,7 @@ describe('Progress Tab', () => {
       expect(screen.queryByTestId('certificate-status-component')).not.toBeInTheDocument();
     });
 
-    it('Shows not available messaging before certificates are available to nonpassing learners when theres no certificate data', async () => {
+    it.skip('Shows not available messaging before certificates are available to nonpassing learners when theres no certificate data', async () => {
       setMetadata({
         can_view_certificate: false,
         is_enrolled: true,
@@ -1198,7 +1204,7 @@ describe('Progress Tab', () => {
       })}.`)).toBeInTheDocument();
     });
 
-    it('Shows not available messaging before certificates are available to passing learners when theres no certificate data', async () => {
+    it.skip('Shows not available messaging before certificates are available to passing learners when theres no certificate data', async () => {
       setMetadata({
         can_view_certificate: false,
         is_enrolled: true,

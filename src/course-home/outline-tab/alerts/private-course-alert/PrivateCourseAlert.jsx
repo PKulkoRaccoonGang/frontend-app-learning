@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getConfig } from '@edx/frontend-platform';
 import { injectIntl, intlShape, FormattedMessage } from '@edx/frontend-platform/i18n';
 import { getLoginRedirectUrl } from '@edx/frontend-platform/auth';
 import { Alert, Button, Hyperlink } from '@edx/paragon';
@@ -45,15 +44,6 @@ const PrivateCourseAlert = ({ intl, payload }) => {
     </Button>
   );
 
-  const register = (
-    <Hyperlink
-      style={{ textDecoration: 'underline' }}
-      destination={`${getConfig().LMS_BASE_URL}/register?next=${encodeURIComponent(global.location.href)}`}
-    >
-      {intl.formatMessage(genericMessages.registerLowercase)}
-    </Hyperlink>
-  );
-
   const signIn = (
     <Hyperlink
       style={{ textDecoration: 'underline' }}
@@ -73,11 +63,8 @@ const PrivateCourseAlert = ({ intl, payload }) => {
           <FormattedMessage
             id="learning.privateCourse.signInOrRegister"
             description="Prompts the user to sign in or register to see course content."
-            defaultMessage="{signIn} or {register} and then enroll in this course."
-            values={{
-              signIn,
-              register,
-            }}
+            defaultMessage="{signIn} and then enroll in this course."
+            values={{ signIn }}
           />
         </>
       )}

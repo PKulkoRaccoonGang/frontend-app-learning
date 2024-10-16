@@ -16,6 +16,7 @@ const NotificationTray = ({ intl }) => {
     shouldDisplayFullScreen,
     upgradeNotificationCurrentState,
     setUpgradeNotificationCurrentState,
+    currentSidebar,
   } = useContext(SidebarContext);
   const course = useModel('coursewareMeta', courseId);
 
@@ -60,9 +61,10 @@ const NotificationTray = ({ intl }) => {
             org={org}
             upgradeNotificationCurrentState={upgradeNotificationCurrentState}
             setupgradeNotificationCurrentState={setUpgradeNotificationCurrentState}
+            currentSidebar={currentSidebar}
           />
         ) : (
-          <p className="p-3 small">{intl.formatMessage(messages.noNotificationsMessage)}</p>
+          <p className="p-3">{intl.formatMessage(messages.noNotificationsMessage)}</p>
         )}
       </div>
     </SidebarBase>

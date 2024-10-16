@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { breakpoints, Button, useWindowSize } from '@edx/paragon';
+import {
+  breakpoints, Button, useArrowKeyNavigation, useWindowSize,
+} from '@edx/paragon';
 import { ChevronLeft, ChevronRight } from '@edx/paragon/icons';
 import classNames from 'classnames';
 import {
@@ -42,15 +44,76 @@ const SequenceNavigation = ({
 
   const shouldDisplayNotificationTriggerInSequence = useWindowSize().width < breakpoints.small.minWidth;
 
+  const prevArrow = isRtl(getLocale()) ? ChevronRight : ChevronLeft;
+
+  const parentRef = useArrowKeyNavigation({
+    selectors: 'button:not(:disabled)',
+    ignoredKeys: ['ArrowUp', 'ArrowDown'],
+  });
+
+  // eslint-disable-next-line react/no-unstable-nested-components
+  const PreviousButton = () => (
+    <Button
+      variant="link"
+      className="previous-btn"
+      aria-label="previous-btn"
+      onClick={previousSequenceHandler}
+      disabled={isFirstUnit}
+      iconBefore={prevArrow}
+      role="tabpanel"
+      tabIndex={-1}
+      aria-controls={intl.formatMessage(messages.previousButton)}
+      id={intl.formatMessage(messages.previousButton)}
+      aria-labelledby={intl.formatMessage(messages.previousButton)}
+    >
+      {shouldDisplayNotificationTriggerInSequence ? null : intl.formatMessage(messages.previousButton)}
+    </Button>
+  );
+
+  // eslint-disable-next-line react/no-unstable-nested-components
+  const NextButton = () => {
+    const { exitActive, exitText } = GetCourseExitNavigation(courseId, intl);
+    const buttonOnClick = isLastUnit ? goToCourseExitPage : nextSequenceHandler;
+    const buttonText = (isLastUnit && exitText) ? exitText : intl.formatMessage(messages.nextButton);
+    const disabled = isLastUnit && !exitActive;
+    const nextArrow = isRtl(getLocale()) ? ChevronLeft : ChevronRight;
+
+    return (
+      <Button
+        variant="link"
+        className="next-btn"
+        aria-label="next-btn"
+        onClick={buttonOnClick}
+        disabled={disabled}
+        iconAfter={nextArrow}
+        role="tabpanel"
+        tabIndex={-1}
+        aria-controls={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
+        id={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
+        aria-labelledby={shouldDisplayNotificationTriggerInSequence ? null : buttonText}
+      >
+        {shouldDisplayNotificationTriggerInSequence ? null : buttonText}
+      </Button>
+    );
+  };
+
   const renderUnitButtons = () => {
     if (isLocked) {
       return (
-        <UnitButton unitId={unitId} title="" contentType="lock" isActive onClick={() => {}} />
+        <React.Fragment ref={parentRef}>
+          <PreviousButton />
+          <UnitButton unitId={unitId} title="" contentType="lock" isActive onClick={() => {}} />
+          <NextButton />
+        </React.Fragment>
       );
     }
     if (sequence.unitIds.length === 0 || unitId === null) {
       return (
-        <div style={{ flexBasis: '100%', minWidth: 0, borderBottom: 'solid 1px #EAEAEA' }} />
+        <React.Fragment ref={parentRef}>
+          <PreviousButton />
+          <div style={{ flexBasis: '100%', minWidth: 0, borderBottom: 'solid 1px #EAEAEA' }} />
+          <NextButton />
+        </React.Fragment>
       );
     }
     return (
@@ -59,34 +122,20 @@ const SequenceNavigation = ({
         unitId={unitId}
         showCompletion={sequence.showCompletion}
         onNavigate={onNavigate}
+        previousButton={<PreviousButton />}
+        nextButton={<NextButton />}
       />
     );
   };
 
-  const renderNextButton = () => {
-    const { exitActive, exitText } = GetCourseExitNavigation(courseId, intl);
-    const buttonOnClick = isLastUnit ? goToCourseExitPage : nextSequenceHandler;
-    const buttonText = (isLastUnit && exitText) ? exitText : intl.formatMessage(messages.nextButton);
-    const disabled = isLastUnit && !exitActive;
-    const nextArrow = isRtl(getLocale()) ? ChevronLeft : ChevronRight;
-
-    return (
-      <Button variant="link" className="next-btn" onClick={buttonOnClick} disabled={disabled} iconAfter={nextArrow}>
-        {shouldDisplayNotificationTriggerInSequence ? null : buttonText}
-      </Button>
-    );
-  };
-
-  const prevArrow = isRtl(getLocale()) ? ChevronRight : ChevronLeft;
-
   return sequenceStatus === LOADED && (
-    <nav id="courseware-sequenceNavigation" className={classNames('sequence-navigation', className)} style={{ width: shouldDisplayNotificationTriggerInSequence ? '90%' : null }}>
-      <Button variant="link" className="previous-btn" onClick={previousSequenceHandler} disabled={isFirstUnit} iconBefore={prevArrow}>
-        {shouldDisplayNotificationTriggerInSequence ? null : intl.formatMessage(messages.previousButton)}
-      </Button>
+    <nav
+      id="courseware-sequenceNavigation"
+      className={classNames('sequence-navigation', className)}
+      style={{ width: shouldDisplayNotificationTriggerInSequence ? '90%' : null }}
+      aria-label="course sequence tabs"
+    >
       {renderUnitButtons()}
-      {renderNextButton()}
-
     </nav>
   );
 };

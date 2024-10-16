@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { sendTrackEvent, sendTrackingLogEvent } from '@edx/frontend-platform/analytics';
 import { FormattedDate, FormattedMessage, injectIntl } from '@edx/frontend-platform/i18n';
-import { Button } from '@edx/paragon';
+import { Button, useWindowSize, breakpoints } from '@edx/paragon';
 import { setLocalStorage } from '../../data/localStorage';
 import { UpgradeButton } from '../upgrade-button';
 import {
@@ -122,7 +122,7 @@ const ExpirationCountdown = ({
     expirationText = (
       <FormattedMessage
         id="learning.generic.upgradeNotification.expirationDays"
-        defaultMessage={`{dayCount, number} {dayCount, plural, 
+        defaultMessage={`{dayCount, number} {dayCount, plural,
           one {day}
           other {days}} left`}
         values={{
@@ -283,12 +283,15 @@ const UpgradeNotification = ({
   upsellPageName,
   userTimezone,
   verifiedMode,
+  currentSidebar,
 }) => {
   const dateNow = Date.now();
   const timezoneFormatArgs = userTimezone ? { timeZone: userTimezone } : {};
   const correctedTime = new Date(dateNow + timeOffsetMillis);
   const accessExpirationDate = accessExpiration ? new Date(accessExpiration.expirationDate) : null;
   const pastExpirationDeadline = accessExpiration ? new Date(dateNow) > accessExpirationDate : false;
+  const upgradeBtnRef = useRef(null);
+  const wideScreen = useWindowSize().width >= breakpoints.medium.minWidth;
 
   const eventProperties = {
     org_key: org,
@@ -308,6 +311,12 @@ const UpgradeNotification = ({
     sendTrackEvent('Promotion Viewed', promotionEventProperties);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (currentSidebar === 'NOTIFICATIONS' && upgradeBtnRef.current) {
+      upgradeBtnRef.current.focus();
+    }
+  }, [currentSidebar, upgradeBtnRef]);
 
   if (!verifiedMode) {
     return null;
@@ -447,10 +456,11 @@ const UpgradeNotification = ({
   if (pastExpirationDeadline) {
     callToActionButton = (
       <Button
-        variant="primary"
+        className="call-to-action-btn"
         onClick={logClickPastExpiration}
         href={marketingUrl}
         block
+        ref={upgradeBtnRef}
       >
         View Course Details
       </Button>
@@ -458,6 +468,7 @@ const UpgradeNotification = ({
   } else {
     callToActionButton = (
       <UpgradeButton
+        className="call-to-action-btn"
         offer={offer}
         onClick={logClick}
         verifiedMode={verifiedMode}
@@ -481,9 +492,12 @@ const UpgradeNotification = ({
   }
 
   return (
-    <section className={classNames('upgrade-notification small', { 'card mb-4': shouldDisplayBorder })}>
+    <section className={classNames('upgrade-notification', {
+      'card mb-4': shouldDisplayBorder, small: !wideScreen,
+    })}
+    >
       <div id="courseHome-upgradeNotification">
-        <h2 className="h5 upgrade-notification-header" id="outline-sidebar-upgrade-header">
+        <h2 className="upgrade-notification-header" id="outline-sidebar-upgrade-header">
           {upgradeNotificationHeaderText}
         </h2>
         {expirationBanner}
@@ -522,6 +536,7 @@ UpgradeNotification.propTypes = {
     price: PropTypes.number.isRequired,
     upgradeUrl: PropTypes.string.isRequired,
   }),
+  currentSidebar: PropTypes.string.isRequired,
 };
 
 UpgradeNotification.defaultProps = {

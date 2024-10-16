@@ -1,5 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import classNames from 'classnames';
+import { useWindowSize, breakpoints } from '@edx/paragon';
 
 import { injectIntl, intlShape } from '@edx/frontend-platform/i18n';
 
@@ -7,9 +9,7 @@ import DateSummary from '../DateSummary';
 import messages from '../messages';
 import { useModel } from '../../../generic/model-store';
 
-const CourseDates = ({
-  intl,
-}) => {
+const CourseDates = ({ intl }) => {
   const {
     courseId,
   } = useSelector(state => state.courseHome);
@@ -22,6 +22,7 @@ const CourseDates = ({
       datesTabLink,
     },
   } = useModel('outline', courseId);
+  const wideScreen = useWindowSize().width >= breakpoints.medium.minWidth;
 
   if (courseDateBlocks.length === 0) {
     return null;
@@ -40,7 +41,10 @@ const CourseDates = ({
             />
           ))}
         </ol>
-        <a className="font-weight-bold ml-4 pl-1 small" href={datesTabLink}>
+        <a
+          className={classNames('font-weight-bold ml-4 pl-1', { small: !wideScreen })}
+          href={datesTabLink}
+        >
           {intl.formatMessage(messages.allDates)}
         </a>
       </div>
