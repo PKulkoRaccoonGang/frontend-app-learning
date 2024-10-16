@@ -16,7 +16,6 @@ import SidebarProvider from './sidebar/SidebarContextProvider';
 import SidebarTriggers from './sidebar/SidebarTriggers';
 
 import { useModel } from '../../generic/model-store';
-import { getSessionStorage, setSessionStorage } from '../../data/sessionStorage';
 
 const Course = ({
   courseId,
@@ -52,19 +51,6 @@ const Course = ({
   );
   const shouldDisplayTriggers = windowWidth >= breakpoints.small.minWidth;
   const daysPerWeek = course?.courseGoals?.selectedGoal?.daysPerWeek;
-
-  // Responsive breakpoints for showing the notification button/tray
-  const shouldDisplayNotificationTrayOpenOnLoad = windowWidth > breakpoints.medium.minWidth;
-
-  // Course specific notification tray open/closed persistance by browser session
-  if (!getSessionStorage(`notificationTrayStatus.${courseId}`)) {
-    if (shouldDisplayNotificationTrayOpenOnLoad) {
-      setSessionStorage(`notificationTrayStatus.${courseId}`, 'open');
-    } else {
-      // responsive version displays the tray closed on initial load, set the sessionStorage to closed
-      setSessionStorage(`notificationTrayStatus.${courseId}`, 'closed');
-    }
-  }
 
   useEffect(() => {
     const celebrateFirstSection = celebrations && celebrations.firstSection;

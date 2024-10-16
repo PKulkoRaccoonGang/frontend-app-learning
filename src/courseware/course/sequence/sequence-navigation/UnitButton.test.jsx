@@ -10,6 +10,8 @@ import UnitButton from './UnitButton';
 describe('Unit Button', () => {
   let mockData;
   const courseMetadata = Factory.build('courseMetadata');
+  const blockFirstId = 'block-v1:edX+DemoX+Demo_Course+type@sequential+block@bcdabcdabcdabcdabcdabcdabcdabcd4';
+  const blockNextId = 'block-v1:edX+DemoX+Demo_Course+type@problem+block@bcdabcdabcdabcdabcdabcdabcdabcd1';
   const unitBlocks = [Factory.build(
     'block',
     { type: 'problem' },
@@ -36,25 +38,25 @@ describe('Unit Button', () => {
 
   it('hides title by default', () => {
     render(<UnitButton {...mockData} />);
-    expect(screen.getByRole('tabpanel')).not.toHaveTextContent(unit.display_name);
+    expect(screen.getByRole('tab')).not.toHaveTextContent(unit.display_name);
   });
 
   it('shows title', () => {
     render(<UnitButton {...mockData} showTitle />);
-    expect(screen.getByRole('tabpanel')).toHaveTextContent(unit.display_name);
+    expect(screen.getByRole('tab')).toHaveTextContent(unit.display_name);
   });
 
   it('check button attributes', () => {
     render(<UnitButton {...mockData} showTitle />);
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('id', `${unit.display_name}-${courseMetadata.id}`);
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-controls', unit.display_name);
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', unit.display_name);
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('tab')).toHaveAttribute('id', blockFirstId);
+    expect(screen.getByRole('tab')).toHaveAttribute('aria-controls', blockNextId);
+    expect(screen.getByRole('tab')).toHaveAttribute('title', unit.display_name);
+    expect(screen.getByRole('tab')).toHaveAttribute('tabindex', '-1');
   });
 
   it('button with isActive prop has tabindex 0', () => {
     render(<UnitButton {...mockData} isActive />);
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('tab')).toHaveAttribute('tabindex', '0');
   });
 
   it('does not show completion for non-completed unit', () => {
@@ -95,7 +97,7 @@ describe('Unit Button', () => {
   it('handles the click', () => {
     const onClick = jest.fn();
     render(<UnitButton {...mockData} onClick={onClick} />);
-    fireEvent.click(screen.getByRole('tabpanel'));
+    fireEvent.click(screen.getByRole('tab'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 

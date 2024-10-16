@@ -56,6 +56,7 @@ const SequenceNavigation = ({
     <Button
       variant="link"
       className="previous-btn"
+      data-testid="course-unit-previous-btn"
       aria-label={shouldDisplayNotificationTriggerInSequence ? intl.formatMessage(messages.previousButton) : null}
       onClick={previousSequenceHandler}
       disabled={isFirstUnit}
@@ -79,6 +80,7 @@ const SequenceNavigation = ({
       <Button
         variant="link"
         className="next-btn"
+        data-testid="course-unit-next-btn"
         aria-label={shouldDisplayNotificationTriggerInSequence ? buttonText : null}
         onClick={buttonOnClick}
         disabled={disabled}

@@ -46,7 +46,7 @@ describe('Sequence Navigation Tabs', () => {
     useIndexOfLastVisibleChild.mockReturnValue([0, null, null]);
     render(<SequenceNavigationTabs {...mockData} />);
 
-    expect(screen.getAllByRole('tabpanel')).toHaveLength(unitBlocks.length);
+    expect(screen.getAllByRole('tab')).toHaveLength(unitBlocks.length);
   });
 
   it('renders unit buttons and dropdown button', async () => {
@@ -63,7 +63,7 @@ describe('Sequence Navigation Tabs', () => {
       await fireEvent.click(dropdownToggle);
     });
     const dropdownMenu = container.querySelector('.dropdown');
-    const dropdownButtons = getAllByRole(dropdownMenu, 'tabpanel');
+    const dropdownButtons = getAllByRole(dropdownMenu, 'tab');
 
     expect(dropdownButtons).toHaveLength(unitBlocks.length);
     expect(getAllByRole(dropdownMenu, 'button')).toHaveLength(1);
@@ -75,19 +75,19 @@ describe('Sequence Navigation Tabs', () => {
     useIndexOfLastVisibleChild.mockReturnValue([0, null, null]);
     render(<SequenceNavigationTabs {...mockData} />);
 
-    const firstUnitButton = screen.getAllByRole('tabpanel')[0];
+    const firstUnitButton = screen.getAllByRole('tab')[0];
     firstUnitButton.focus();
 
     await userEvent.keyboard('{ArrowRight}');
 
     await waitFor(() => {
-      expect(document.activeElement).toBe(screen.getAllByRole('tabpanel')[1]);
+      expect(document.activeElement).toBe(screen.getAllByRole('tab')[1]);
     });
 
     await userEvent.keyboard('{ArrowLeft}');
 
     await waitFor(() => {
-      expect(document.activeElement).toBe(screen.getAllByRole('tabpanel')[0]);
+      expect(document.activeElement).toBe(screen.getAllByRole('tab')[0]);
     });
   });
 });
