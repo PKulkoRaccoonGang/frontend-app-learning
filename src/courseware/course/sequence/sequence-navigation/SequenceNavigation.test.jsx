@@ -73,19 +73,18 @@ describe('Sequence Navigation', () => {
 
   it('renders correctly and handles unit button clicks', () => {
     const onNavigate = jest.fn();
-    const previousAndNextButtonsLength = 2;
     render(<SequenceNavigation {...mockData} {...{ onNavigate }} />);
 
-    const unitButtons = screen.getAllByRole('tabpanel');
+    const unitButtons = screen.getAllByRole('tab');
     expect(unitButtons).toHaveLength(unitButtons.length);
     unitButtons.forEach(button => fireEvent.click(button));
-    expect(onNavigate).toHaveBeenCalledTimes(unitButtons.length - previousAndNextButtonsLength);
+    expect(onNavigate).toHaveBeenCalledTimes(unitButtons.length);
   });
 
   it('has both navigation buttons enabled for a non-corner unit of the sequence', () => {
     render(<SequenceNavigation {...mockData} />);
 
-    screen.getAllByRole('tabpanel', { name: /previous|next/i }).forEach(button => {
+    screen.getAllByRole('button', { name: /previous|next/i }).forEach(button => {
       expect(button).toBeEnabled();
     });
   });
@@ -93,8 +92,8 @@ describe('Sequence Navigation', () => {
   it('has the "Previous" button disabled for the first unit of the sequence', () => {
     render(<SequenceNavigation {...mockData} unitId={unitBlocks[0].id} />);
 
-    expect(screen.getByRole('tabpanel', { name: /previous/i })).toBeDisabled();
-    expect(screen.getByRole('tabpanel', { name: /next/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /next/i })).toBeEnabled();
   });
 
   it('has the "Next" button disabled for the last unit of the sequence if there is no Exit page', async () => {
@@ -109,8 +108,8 @@ describe('Sequence Navigation', () => {
       { store: testStore },
     );
 
-    expect(screen.getByRole('tabpanel', { name: /previous/i })).toBeEnabled();
-    expect(screen.getByRole('tabpanel', { name: /next/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
   });
 
   it('displays end of course message instead of the "Next" button as needed', async () => {
@@ -125,8 +124,8 @@ describe('Sequence Navigation', () => {
       { store: testStore },
     );
 
-    expect(screen.getByRole('tabpanel', { name: /previous/i })).toBeEnabled();
-    expect(screen.getByRole('tabpanel', { name: /next-btn/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /next/i })).toBeEnabled();
   });
 
   it('displays complete course message instead of the "Next" button as needed', async () => {
@@ -146,8 +145,8 @@ describe('Sequence Navigation', () => {
       { store: testStore },
     );
 
-    expect(screen.getByRole('tabpanel', { name: /previous/i })).toBeEnabled();
-    expect(screen.getByRole('tabpanel', { name: /next-btn/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Complete the course' })).toBeEnabled();
   });
 
   it('handles "Previous" and "Next" click', () => {
@@ -155,10 +154,10 @@ describe('Sequence Navigation', () => {
     const nextSequenceHandler = jest.fn();
     render(<SequenceNavigation {...mockData} {...{ previousSequenceHandler, nextSequenceHandler }} />);
 
-    fireEvent.click(screen.getByRole('tabpanel', { name: /previous/i }));
+    fireEvent.click(screen.getByRole('button', { name: /previous/i }));
     expect(previousSequenceHandler).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole('tabpanel', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
     expect(nextSequenceHandler).toHaveBeenCalledTimes(1);
   });
 });

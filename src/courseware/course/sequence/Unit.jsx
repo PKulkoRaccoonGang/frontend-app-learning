@@ -153,7 +153,7 @@ const Unit = ({
   }, [id, setIframeHeight, hasLoaded, iframeHeight, setHasLoaded, onLoaded]);
 
   return (
-    <div className="unit">
+    <div className="unit" role="tabpanel" id={unit.id}>
       <h1 className="mb-0 h3">{unit.title}</h1>
       <h2 className="sr-only">{intl.formatMessage(messages.headerPlaceholder)}</h2>
       <BookmarkButton

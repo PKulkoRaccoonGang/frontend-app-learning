@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Factory } from 'rosie';
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { breakpoints } from '@edx/paragon';
+import { within } from '@testing-library/react';
 import {
   loadUnit, render, screen, fireEvent, waitFor, initializeTestStore,
 } from '../../../setupTest';
@@ -74,10 +75,11 @@ describe('Sequence', () => {
     );
 
     await waitFor(() => expect(screen.queryByText('Loading locked content messaging...')).toBeInTheDocument());
-    // `Prerequisite` and `Close Tray` buttons.
-    expect(screen.getAllByRole('button').length).toEqual(2);
-    // `Active`, 'Prev', 'Next' button.
-    expect(screen.getAllByRole('tabpanel').length).toEqual(3);
+
+    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /close notification tray/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab')).toHaveClass('active');
 
     expect(screen.getByText('Content Locked')).toBeInTheDocument();
     const unitContainer = container.querySelector('.unit-container');
@@ -126,18 +128,17 @@ describe('Sequence', () => {
 
   it('handles loading unit', async () => {
     render(<Sequence {...mockData} />);
-    const previousAndNextButtonLength = 2;
     expect(await screen.findByText('Loading learning sequence...')).toBeInTheDocument();
     // Renders unit tabs.
-    expect(screen.getAllByRole('tabpanel')).toHaveLength(unitBlocks.length + previousAndNextButtonLength);
+    expect(screen.getAllByRole('tab')).toHaveLength(unitBlocks.length);
 
-    // `Previous`, `Next`, `Prerequisite` and `Close Tray` buttons.
-    expect(screen.getAllByRole('button').length).toEqual(2);
+    // At this point we have Previous and Next buttons in the top and bottom navigation block.
+    expect(screen.getAllByRole('button').length).toEqual(4);
 
     loadUnit();
     await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
-    // At this point there will be `Previous` and `Next` buttons it tablist.
-    expect(screen.getAllByRole('tabpanel', { name: /previous|next/i }).length).toEqual(2);
+    // At this point we have Previous and Next buttons in the top and bottom navigation block.
+    expect(screen.getAllByRole('button', { name: /previous|next/i }).length).toEqual(4);
   });
 
   describe('sequence and unit navigation buttons', () => {
@@ -166,10 +167,10 @@ describe('Sequence', () => {
         sequenceId: sequenceBlocks[1].id,
         previousSequenceHandler: jest.fn(),
       };
-      render(<Sequence {...testData} />, { store: testStore });
+      const { container } = render(<Sequence {...testData} />, { store: testStore });
       expect(await screen.findByText('Loading learning sequence...')).toBeInTheDocument();
 
-      const sequencePreviousButton = screen.getByRole('tabpanel', { name: /previous/i });
+      const sequencePreviousButton = screen.getByRole('button', { name: /previous/i });
       fireEvent.click(sequencePreviousButton);
       expect(testData.previousSequenceHandler).toHaveBeenCalledTimes(1);
       expect(sendTrackEvent).toHaveBeenCalledTimes(1);
@@ -182,17 +183,20 @@ describe('Sequence', () => {
 
       loadUnit();
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
-      const unitPreviousButton = screen.getAllByRole('button', { name: /previous/i })
-        .filter(button => button !== sequencePreviousButton)[0];
-      expect(unitPreviousButton).toBeInTheDocument();
-      fireEvent.click(unitPreviousButton);
-      expect(testData.previousSequenceHandler).toHaveBeenCalledTimes(2);
-      expect(sendTrackEvent).toHaveBeenCalledTimes(2);
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.previous_selected', {
-        current_tab: 1,
-        id: testData.unitId,
-        tab_count: unitBlocks.length,
-        widget_placement: 'bottom',
+      waitFor(() => {
+        const unitContainer = container.querySelector('.unit-container');
+        const unitPreviousButton = within(unitContainer).getByRole('button', { name: /previous/i })
+          .filter(button => button !== sequencePreviousButton)[0];
+        expect(unitPreviousButton).toBeInTheDocument();
+        fireEvent.click(unitPreviousButton);
+        expect(testData.previousSequenceHandler).toHaveBeenCalledTimes(2);
+        expect(sendTrackEvent).toHaveBeenCalledTimes(2);
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.previous_selected', {
+          current_tab: 1,
+          id: testData.unitId,
+          tab_count: unitBlocks.length,
+          widget_placement: 'bottom',
+        });
       });
     });
 
@@ -203,10 +207,10 @@ describe('Sequence', () => {
         sequenceId: sequenceBlocks[0].id,
         nextSequenceHandler: jest.fn(),
       };
-      render(<Sequence {...testData} />, { store: testStore });
+      const { container } = render(<Sequence {...testData} />, { store: testStore });
       expect(await screen.findByText('Loading learning sequence...')).toBeInTheDocument();
 
-      const sequenceNextButton = screen.getByRole('tabpanel', { name: /next/i });
+      const sequenceNextButton = screen.getByRole('button', { name: /next/i });
       fireEvent.click(sequenceNextButton);
       expect(testData.nextSequenceHandler).toHaveBeenCalledTimes(1);
       expect(sendTrackEvent).toHaveBeenCalledWith('edx.ui.lms.sequence.next_selected', {
@@ -218,16 +222,19 @@ describe('Sequence', () => {
 
       loadUnit();
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
-      const unitNextButton = screen.getAllByRole('button', { name: /next/i })
-        .filter(button => button !== sequenceNextButton)[0];
-      fireEvent.click(unitNextButton);
-      expect(testData.nextSequenceHandler).toHaveBeenCalledTimes(2);
-      expect(sendTrackEvent).toHaveBeenCalledTimes(2);
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.next_selected', {
-        current_tab: unitBlocks.length,
-        id: testData.unitId,
-        tab_count: unitBlocks.length,
-        widget_placement: 'bottom',
+      waitFor(() => {
+        const unitContainer = container.querySelector('.unit-container');
+        const unitNextButton = within(unitContainer).getAllByRole('button', { name: /next/i })
+          .filter(button => button !== sequenceNextButton)[0];
+        fireEvent.click(unitNextButton);
+        expect(testData.nextSequenceHandler).toHaveBeenCalledTimes(2);
+        expect(sendTrackEvent).toHaveBeenCalledTimes(2);
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.next_selected', {
+          current_tab: unitBlocks.length,
+          id: testData.unitId,
+          tab_count: unitBlocks.length,
+          widget_placement: 'bottom',
+        });
       });
     });
 
@@ -244,11 +251,11 @@ describe('Sequence', () => {
       render(<Sequence {...testData} />, { store: testStore });
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByRole('tabpanel', { name: /previous/i }));
+      fireEvent.click(screen.getByRole('button', { name: /previous/i }));
       expect(testData.previousSequenceHandler).not.toHaveBeenCalled();
       expect(testData.unitNavigationHandler).toHaveBeenCalledWith(unitBlocks[unitNumber - 1].id);
 
-      fireEvent.click(screen.getByRole('tabpanel', { name: /next/i }));
+      fireEvent.click(screen.getByRole('button', { name: /next/i }));
       expect(testData.nextSequenceHandler).not.toHaveBeenCalled();
       // As `previousSequenceHandler` and `nextSequenceHandler` are mocked, we aren't really changing the position here.
       // Therefore the next unit will still be `the initial one + 1`.
@@ -269,7 +276,7 @@ describe('Sequence', () => {
       loadUnit();
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
 
-      screen.getAllByRole('tabpanel', { name: /previous/i }).forEach(button => fireEvent.click(button));
+      screen.getAllByRole('button', { name: /previous/i }).forEach(button => fireEvent.click(button));
 
       expect(testData.previousSequenceHandler).not.toHaveBeenCalled();
       expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
@@ -288,7 +295,7 @@ describe('Sequence', () => {
       loadUnit();
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
 
-      screen.getAllByRole('tabpanel', { name: /next/i }).forEach(button => fireEvent.click(button));
+      screen.getAllByRole('button', { name: /next/i }).forEach(button => fireEvent.click(button));
 
       expect(testData.nextSequenceHandler).not.toHaveBeenCalled();
       expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
@@ -326,46 +333,49 @@ describe('Sequence', () => {
         nextSequenceHandler: jest.fn(),
       };
 
-      render(<Sequence {...testData} />, { store: innerTestStore });
+      const { container } = render(<Sequence {...testData} />, { store: innerTestStore });
       loadUnit();
       await waitFor(() => expect(screen.queryByText('Loading learning sequence...')).not.toBeInTheDocument());
+      waitFor(() => {
+        const unitContainer = container.querySelector('.unit-container');
 
-      const unitPrevButton = screen.getByRole('tabpanel', { name: /previous/i });
-      const sequencePrevButton = screen.getByRole('button', { name: /previous/i });
-      const unitNextButton = screen.getByRole('tabpanel', { name: /next/i });
-      const sequenceNextButton = screen.getByRole('button', { name: /next/i });
+        const unitPrevButton = screen.getByTestId('course-unit-previous-btn');
+        const sequencePrevButton = within(unitContainer).getByRole('button', { name: /previous/i });
+        const unitNextButton = screen.getByTestId('course-unit-next-btn');
+        const sequenceNextButton = within(unitContainer).getByRole('button', { name: /next/i });
 
-      [unitPrevButton, sequencePrevButton].forEach(button => fireEvent.click(button));
-      expect(testData.previousSequenceHandler).toHaveBeenCalledTimes(2);
-      expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
+        [unitPrevButton, sequencePrevButton].forEach(button => fireEvent.click(button));
+        expect(testData.previousSequenceHandler).toHaveBeenCalledTimes(2);
+        expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
 
-      [unitNextButton, sequenceNextButton].forEach(button => fireEvent.click(button));
-      expect(testData.nextSequenceHandler).toHaveBeenCalledTimes(2);
-      expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
+        [unitNextButton, sequenceNextButton].forEach(button => fireEvent.click(button));
+        expect(testData.nextSequenceHandler).toHaveBeenCalledTimes(2);
+        expect(testData.unitNavigationHandler).not.toHaveBeenCalled();
 
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(1, 'edx.ui.lms.sequence.previous_selected', {
-        current_tab: 1,
-        id: testData.unitId,
-        tab_count: 0,
-        widget_placement: 'top',
-      });
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.previous_selected', {
-        current_tab: 1,
-        id: testData.unitId,
-        tab_count: 0,
-        widget_placement: 'bottom',
-      });
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(3, 'edx.ui.lms.sequence.next_selected', {
-        current_tab: 1,
-        id: testData.unitId,
-        tab_count: 0,
-        widget_placement: 'top',
-      });
-      expect(sendTrackEvent).toHaveBeenNthCalledWith(4, 'edx.ui.lms.sequence.next_selected', {
-        current_tab: 1,
-        id: testData.unitId,
-        tab_count: 0,
-        widget_placement: 'bottom',
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(1, 'edx.ui.lms.sequence.previous_selected', {
+          current_tab: 1,
+          id: testData.unitId,
+          tab_count: 0,
+          widget_placement: 'top',
+        });
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(2, 'edx.ui.lms.sequence.previous_selected', {
+          current_tab: 1,
+          id: testData.unitId,
+          tab_count: 0,
+          widget_placement: 'bottom',
+        });
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(3, 'edx.ui.lms.sequence.next_selected', {
+          current_tab: 1,
+          id: testData.unitId,
+          tab_count: 0,
+          widget_placement: 'top',
+        });
+        expect(sendTrackEvent).toHaveBeenNthCalledWith(4, 'edx.ui.lms.sequence.next_selected', {
+          current_tab: 1,
+          id: testData.unitId,
+          tab_count: 0,
+          widget_placement: 'bottom',
+        });
       });
     });
 

@@ -21,8 +21,10 @@ const UnitButton = ({
   className,
   showTitle,
   unitIndex,
+  sequenceId,
 }) => {
-  useScrollToContent(isActive ? `${title}-${unitIndex}` : null);
+  const unitClassName = `unit-${unitIndex}`;
+  useScrollToContent(null, isActive ? unitClassName : null);
 
   const handleClick = useCallback(() => {
     onClick(unitId);
@@ -47,18 +49,19 @@ const UnitButton = ({
 
   return (
     <Button
-      className={classNames({
+      className={classNames(unitClassName, {
         active: isActive,
         complete: showCompletion && complete,
       }, className)}
       variant="link"
       onClick={handleClick}
       title={title}
-      role="tabpanel"
+      role="tab"
+      aria-selected={isActive}
+      aria-expanded={isActive}
       tabIndex={isActive ? 0 : -1}
-      aria-controls={title}
-      id={`${title}-${unitIndex}`}
-      aria-labelledby={title}
+      aria-controls={unitId}
+      id={sequenceId}
       onKeyDown={handleKeyDown}
     >
       <UnitIcon type={contentType} />
@@ -88,6 +91,7 @@ UnitButton.propTypes = {
   title: PropTypes.string.isRequired,
   unitId: PropTypes.string.isRequired,
   unitIndex: PropTypes.number.isRequired,
+  sequenceId: PropTypes.string.isRequired,
 };
 
 UnitButton.defaultProps = {

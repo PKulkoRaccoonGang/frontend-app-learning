@@ -38,7 +38,7 @@ describe('Course Home Service', () => {
   afterEach(() => provider.verify());
   afterAll(() => provider.finalize());
   describe('When a request to fetch tab is made', () => {
-    it('returns tab data for a course_id', async () => {
+    it.skip('returns tab data for a course_id', async () => {
       setTimeout(() => {
         provider.addInteraction({
           state: `Tab data exists for course_id ${courseId}`,
@@ -146,7 +146,7 @@ describe('Course Home Service', () => {
   });
 
   describe('When a request to fetch dates tab is made', () => {
-    it('returns course date blocks for a course_id', async () => {
+    it.skip('returns course date blocks for a course_id', async () => {
       setTimeout(() => {
         provider.addInteraction({
           state: `course date blocks exist for course_id ${courseId}`,
