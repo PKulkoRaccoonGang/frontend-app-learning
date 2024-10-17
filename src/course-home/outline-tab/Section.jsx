@@ -38,6 +38,11 @@ const Section = ({
 
   useEffect(() => {
     setOpen(defaultOpen);
+
+    // Removing tabIndex from elements inside the Collapsible component to fix the focus logic.
+    // Ensures better accessibility by not interfering with the default focus order.
+    const triggers = document.querySelectorAll('.collapsible-trigger');
+    triggers?.forEach((trigger) => trigger.setAttribute('tabIndex', '-1'));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -63,7 +68,8 @@ const Section = ({
         )}
       </div>
       <div className="col-10 ml-3 p-0 font-weight-bold text-dark-500">
-        <h2 className="course-outline-tab-section-title text-dark-500 mb-0">
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+        <h2 tabIndex="0" className="course-outline-tab-section-title text-dark-500 mb-0">
           <span className="align-middle">{title}</span>
         </h2>
         <span className="sr-only">
@@ -80,21 +86,23 @@ const Section = ({
         styling="card-lg"
         title={sectionTitle}
         open={open}
-        onToggle={() => { setOpen(!open); }}
+        onToggle={() => setOpen(!open)}
         iconWhenClosed={(
           <IconButton
             alt={intl.formatMessage(messages.openSection)}
             icon={faPlus}
-            onClick={() => { setOpen(true); }}
+            onClick={() => setOpen(true)}
             size="sm"
+            tabIndex="-1"
           />
         )}
         iconWhenOpen={(
           <IconButton
             alt={intl.formatMessage(genericMessages.close)}
             icon={faMinus}
-            onClick={() => { setOpen(false); }}
+            onClick={() => setOpen(false)}
             size="sm"
+            tabIndex="-1"
           />
         )}
       >
