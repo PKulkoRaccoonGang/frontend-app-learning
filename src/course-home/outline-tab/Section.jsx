@@ -39,8 +39,10 @@ const Section = ({
   useEffect(() => {
     setOpen(defaultOpen);
 
+    // Removing tabIndex from elements inside the Collapsible component to fix the focus logic.
+    // Ensures better accessibility by not interfering with the default focus order.
     const triggers = document.querySelectorAll('.collapsible-trigger');
-    triggers.forEach((trigger) => trigger.setAttribute('tabIndex', '-1'));
+    triggers?.forEach((trigger) => trigger.setAttribute('tabIndex', '-1'));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
