@@ -23,7 +23,7 @@ const UnitButton = ({
   unitIndex,
   sequenceId,
 }) => {
-  const unitClassName = `${title.toLowerCase()}-${unitIndex}`;
+  const unitClassName = `unit-${unitIndex}`;
   useScrollToContent(null, isActive ? unitClassName : null);
 
   const handleClick = useCallback(() => {
